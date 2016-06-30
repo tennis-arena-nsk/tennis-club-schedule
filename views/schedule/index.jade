@@ -1,0 +1,60 @@
+extends ../layout
+
+block content
+    h2 Расписание теннисных кортов Теннис-Арены
+    hr
+
+    #calendar
+
+    script.
+        $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            defaultDate: Date.now(),
+            editable: true,
+            eventLimit: true, // allow "more" link when too many events
+
+            defaultView: 'agendaDay',
+            events: [
+                {
+                    title: 'All Day Event',
+                    start: '2016-06-01',
+                    resourceId: 'a'
+                },
+                {
+                    title: 'Long Event',
+                    start: '2016-06-07',
+                    end: '2016-06-10',
+                    resourceId : 'b'
+                },
+                {
+                    id: 999,
+                    title: 'Repeating Event',
+                    start: '2016-06-09T16:00:00',
+                    resourceId : 'a'
+                },
+                {
+                    id: 999,
+                    title: 'Repeating Event',
+                    start: '2016-06-16T16:00:00',
+                    resourceId : 'a'
+                },
+            ],
+            resources: [
+                { id: 'a', title: '1' },
+                { id: 'b', title: '2' },
+                { id: 'c', title: '3' },
+                { id: 'd', title: '4' }
+            ],
+            // other options go here...
+            schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+            groupByDateAndResource: true
+        });
+
+
+
+
+

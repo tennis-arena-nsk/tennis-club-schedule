@@ -13,6 +13,8 @@ Schedule web app for tennis club: node, express, mongo, hackaton-starter templat
   
 ## API endpoints
 
+### User system 
+
     GET  /user/login            (html)  login page
     POST /user/login                    login via email/ password or social login
     GET  /user/logout                   logout current user
@@ -28,5 +30,26 @@ Schedule web app for tennis club: node, express, mongo, hackaton-starter templat
     GET  /user/forgot           (html)  forgot password screen
     POST /user/forgot                   reset password action
     
+    GET /schedule              (public) get schedule
+    
+    GET /user/reservations              get reservations of current user
+    GET 
+    
+### Use case
+
+User open site, make authentication. 
+>    System displays site in auth state.
+    
+Then he go to schedule and select availiable timeslot.
+>    System displays schedule with timeslots and user's reservations. For logged-in users system displays utton to cancel reservation.
+    
+User makes reservation
+>    System adds reservation to list of user's current reservations. System emails list of current reservations to stuff manager.
+    
+    
+    
+    
+
+
 
 (с) 2016, deksden, Not for commercial use.

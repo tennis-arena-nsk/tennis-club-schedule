@@ -31,9 +31,8 @@ Schedule web app for tennis club: node, express, mongo, hackaton-starter templat
     POST /user/forgot                   reset password action
     
     GET /schedule              (public) get schedule
-    
-    GET /user/reservations              get reservations of current user
-    GET 
+    GET /user/reservation               get reservations of current user
+    PUT /user/reservation
     
 ### Use case
 

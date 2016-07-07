@@ -161,9 +161,11 @@ app.get('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAutho
 app.post('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.postPinterest);
 
 /**
- * Schedule routes for API & views.
+ * Tennis club schedule routes for API & views.
  */
 app.get('/schedule', scheduleController.getSchedule);
+app.get('/schedule/week', scheduleController.getWeek );
+
 
 /**
  * OAuth authentication routes. (Sign in)

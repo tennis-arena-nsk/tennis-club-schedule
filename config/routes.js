@@ -48,6 +48,7 @@ exports = module.exports = (app, passport) => {
   app.post('/signup', userController.postSignup);
   app.get('/contact', contactController.getContact);
   app.post('/contact', contactController.postContact);
+
   app.get('/account', isAuthenticated, userController.getAccount);
   app.post('/account/profile', isAuthenticated, userController.postUpdateProfile);
   app.post('/account/password', isAuthenticated, userController.postUpdatePassword);
@@ -56,11 +57,17 @@ exports = module.exports = (app, passport) => {
 
   /**
    * Tennis club schedule routes for API & views.
-   */
-  app.get('/schedule', scheduleController.getSchedule);
-  app.get('/schedule/week', scheduleController.getWeek);
-  app.get('/account/reservation', scheduleController.getAccountReservation);
+   TODO: convert to REST endpoints to manage resources / schedules */
+  // TODO: attach separate router for resource controller
+  app.get ('/schedules',    scheduleController.getList );
+  app.get ('/schedules/:scheduleId', scheduleController.getItem );
+  app.post('/schedules/:scheduleId', scheduleController.saveItem);
+  app.del ('/schedules/:scheduleId', scheduleController.delItem );
 
+  app.get('/reservations', reservationController.getReservation);
+  app.get('/resources',   scheduleController.getResources);
+
+  app.get('/account/reservation', isAuthenticated, scheduleController.getAccountReservation);
 
   /**
    * OAuth authentication routes. (Sign in)

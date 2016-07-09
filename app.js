@@ -1,7 +1,5 @@
 'use strict';
-/**
- * Module dependencies.
- */
+
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
@@ -27,51 +25,44 @@ dotenv.load({ path: '.env.example' });
 
 
 
-/**
- * Create Express server.
- */
+// create express server:
 const app = express();
 
-/**
- * Connect to MongoDB.
-
-mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
-mongoose.connection.on('error', () => {
-  console.error('MongoDB Connection Error. Please make sure that MongoDB is running.');
-  process.exit(1);
-}); */
-
-//setup mongo, mongoose & models:
+// setup mongo / mongoose:
 const dbUri = process.env.MONGODB_URI || process.env.MONGOLAB_URI
 app.db = mongoose.createConnection(dbUri);
 app.db.uri = process.env.MONGODB_URI || process.env.MONGOLAB_URI
 app.db.on('error', console.error.bind(console, 'mongoose connection error: '));
 app.db.once('open', function () {
-  //and... we have a data store
   console.log('Database connected');
 });
 
+// configure models:
 require('./config/models')(app, mongoose);
 
 
-/**
- * Express configuration.
- */
+// configure express:
 app.disable('x-powered-by');
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(compression());
 
-app.use(sass({
+// sass middleware to process frontend:
+/* app.use(sass({
   src: path.join(__dirname, 'public'),
   dest: path.join(__dirname, 'public')
-}));
+})); */
 
 app.use(logger('dev'));
+
+// accept json/urlencoded form data:
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(expressValidator());
+
+// configure sessions:
 app.use(session({
   resave: true,
   saveUninitialized: true,
@@ -83,7 +74,10 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.use(flash());
+
+// some security:
 app.use((req, res, next) => {
   if (req.path === '/api/upload') {
     next();
@@ -93,6 +87,7 @@ app.use((req, res, next) => {
 });
 app.use(lusca.xframe('SAMEORIGIN'));
 app.use(lusca.xssProtection(true));
+
 app.use((req, res, next) => {
   res.locals.user = req.user;
   next();
@@ -106,22 +101,25 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// configure serving of static files:
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 
-// setup passport
+// configure project-wide locals:
+app.locals.projectName = process.env.PROJECT_NAME;
+app.locals.companyName = process.env.COMPANY_NAME;
+app.locals.copyrightYear = new Date().getFullYear();
+
+// configure passport
 require('./config/passport')(app,passport);
 
-// setup routes:
+// setup app routes
 require('./config/routes')(app,passport);
 
-/**
- * Error Handler.
- */
+// use error handler:
 app.use(errorHandler());
 
-/**
- * Start Express server.
- */
+// Start Express server.
 app.listen(app.get('port'), () => {
   console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
 });

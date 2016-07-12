@@ -1,9 +1,10 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 const crypto = require('crypto');
 
-exports = module.exports = (app, mongoose) => {
+exports = module.exports = (app) => {
 
   let userSchema = new mongoose.Schema({
     email: { type: String, unique: true },
@@ -14,10 +15,7 @@ exports = module.exports = (app, mongoose) => {
     facebook: String,
     twitter: String,
     google: String,
-    github: String,
     instagram: String,
-    linkedin: String,
-    steam: String,
     tokens: Array,
 
     profile: {

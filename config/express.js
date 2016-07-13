@@ -26,7 +26,13 @@ exports = module.exports = class ApplicationConfig {
     app.set('port', process.env.PORT || 3000);
     app.set('views', path.join(__dirname, '../views'));
     app.set('view engine', 'jade');
-    app.use(morgan('dev'));
+
+    morgan.token('accepts', function getId (req) {
+      return req.accepts()
+    })
+
+    app.use(morgan(':method :url :status < :accepts > :response-time'));
+
     app.use(compression());
     app.use(contentLength.validateMax({max: 999}));
     app.use(bodyParser.json());

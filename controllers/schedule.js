@@ -2,10 +2,26 @@
 
 const User = require('../models/user');
 
-/**
- * GET /schedule
- * Render basic schedule view.
- */
+exports = module.exports = class ScheduleController {
+  static list(req,res) {
+    res.status(200).json('{ msg: "ok"}')
+  }
+
+  static create(req,res) {
+    res.status(200).json('{ msg: "ok"}')
+  }
+  static show(req,res) {
+    res.status(200).json('{ msg: "ok"}')
+  }
+  static update(req,res) {
+    res.status(200).json('{ msg: "ok"}')
+  }
+  static delete(req,res) {
+    res.status(200).json('{ msg: "ok"}')
+  }
+}
+
+/*
 exports.getSchedule = (req, res) => {
   res.render('schedule/index', {
     title: 'Расписание'
@@ -37,3 +53,4 @@ exports.getAccountReservation = (req, res) => {
 exports.userAddReservation = (req,res) => {
 
 };
+*/

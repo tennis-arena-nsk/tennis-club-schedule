@@ -17,7 +17,7 @@ dotenv.load({ path: '.env.example' })
 // create express server
 const app = express()
 
-// configure dirrerent parts of app:
+// configure different parts of app:
 ConfigDatabase.init(app) 
 ConfigModels.init(app)
 ConfigExpress.init(app)

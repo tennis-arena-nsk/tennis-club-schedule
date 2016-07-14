@@ -62,7 +62,7 @@ exports = module.exports = class ApplicationConfig {
     }
 
     // some security:
-    app.use((req, res, next) => {
+/*    app.use((req, res, next) => {
       if (req.path === '/api/upload') {
         next();
       } else {
@@ -71,7 +71,7 @@ exports = module.exports = class ApplicationConfig {
     });
     app.use(lusca.xframe('SAMEORIGIN'));
     app.use(lusca.xssProtection(true));
-
+*/
     app.use((req, res, next) => {
       res.locals.user = req.user;
       next();

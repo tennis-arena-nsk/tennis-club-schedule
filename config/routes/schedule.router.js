@@ -1,5 +1,5 @@
 // import controller
-const controller = require('../../controllers/schedule')
+const controller = require('../../controllers/schedule.controller')
 const router = require('express').Router()
 
 exports = module.exports = class ScheduleRoutes {
@@ -8,7 +8,7 @@ exports = module.exports = class ScheduleRoutes {
       .get(controller.list)
       .post(controller.create);
 
-    router.route( '/:id')
+    router.route( '/:id/')
       .get(controller.show)
       .post(controller.update)
       .delete(controller.delete);

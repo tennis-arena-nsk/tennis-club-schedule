@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 const _name = 'schedule'
 const Model = require('../models/' + _name + '.model');
 
-exports = module.exports = class ScheduleController {
+exports = module.exports = class {
 
   // list all items
   static list(req,res) {
@@ -96,8 +96,8 @@ exports = module.exports = class ScheduleController {
   }
 
   // delete item
-  static delete(req,res) {
-    Model.delete(req.params.id)
+  static remove(req,res) {
+    Model.remove(req.params.id)
         .then(() => res.status(204).end())
         .catch(error => res.status(400).json(error));
   }

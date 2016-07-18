@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const Promise = require('bluebird')
 const _ = require('lodash')
 
-let schema = require('mongoose').Schema({
+const schema = require('mongoose').Schema({
     startDate: {
         type: Date,
         required: true
@@ -108,7 +108,7 @@ schema.statics.update = (id, object) => {
     });
 };
 
-schema.statics.delete = id => {
+schema.statics.remove = id => {
     return new Promise((resolve, reject) => {
         if (!_.isString(id)) {
             return reject(new TypeError('Id is not a valid string.'));

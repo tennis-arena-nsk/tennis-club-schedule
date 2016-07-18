@@ -1,48 +1,86 @@
 'use strict';
 
-//const Promise = require('bluebird')
+// core modules:
+const Promise = require('bluebird')
 
-const Model = require('../models/schedule.model');
+// project modules:
+const _name = 'schedule'
+const Model = require('../models/' + _name + '.model');
 
 exports = module.exports = class ScheduleController {
 
   // list all items
   static list(req,res) {
-    console.log( 'controller.list');
+    console.log( _name + '.controller.list');
     Model.list()
         .then(objects => {
-          console.log( 'controller.list: then objects:')
+          console.log( 'listed objects:')
           console.log( objects )
 
-          if (req.accepts(['html', 'json']) === 'json' ) {
-            console.log( 'return json' )
+          if (req.accepts(['json','html']) === 'json') {
+            console.log( 'return as json' )
             res.status(200).json(objects)
           } else {
-            console.log( 'return html' )
+            console.log( 'return as html' )
             res.locals.objects = objects
-            res.render('schedule/schedule.list.jade')
+            res.render( _name + '/list')
           }
           
 
         })
-        .catch(error => res.status(400).json(error));
+        .catch(error => {
+          if (req.accepts('json')) {
+            console.log( 'return as json' )
+            res.status(400).json(error)
+          } else {
+            console.log( 'return as html' )
+            res.locals.objects = error
+            res.locals.http_error_code=400
+            res.status(400).render( 'html/400')
+          }
+
+        });
   }
 
   // create item
   static create(req,res) {
+    console.log( _name + '.controller.create');
     let _object = req.body;
 
     Model.create(_object)
         .then(object => res.status(201).json(object))
-        .catch(error => res.status(400).json(error));
+        .catch(error => {
+          if (req.accepts('json')) {
+            console.log( 'return as json' )
+            res.status(400).json(error)
+          } else {
+            console.log( 'return as html' )
+            res.locals.objects = error
+            res.locals.http_error_code=400
+            res.status(400).render( 'html/400')
+          }
+        });
   }
 
   // show single item
   static show(req,res) {
     console.log( 'controller.show');
     Model.show(req.params.id)
-        .then(service => res.status(200).json(service))
-        .catch(error => res.status(400).json(error));
+        .then(item => {
+          res.status(200).json(item)
+        })
+        .catch(error => {
+        if (req.accepts(['json','html']) === 'json') {
+          console.log( 'return as json' )
+          res.status(400).json(error)
+        } else {
+          console.log( 'return as html' )
+          res.locals.objects = error
+          res.locals.http_error_code = 400
+          res.status(400).render( 'html/400')
+        }
+      });
+
   }
 
   // update item

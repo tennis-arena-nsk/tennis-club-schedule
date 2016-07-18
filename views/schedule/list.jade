@@ -1,0 +1,11 @@
+extends ../layout
+
+block content
+
+    ul
+        each object in objects
+            li
+              div
+                  span schedule
+                  a(href='/schedule/' + object._id ) ==>
+                  span  ( #{object.startDate.toLocaleDateString()} -  #{object.endDate.toLocaleDateString()} )

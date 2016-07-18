@@ -1,10 +1,48 @@
 "use strict"
 
 const mongoose = require('mongoose')
-//const Promise = require('bluebird')
+const Promise = require('bluebird')
 const _ = require('lodash')
 
-let schema = require('./schedule.schema')
+let schema = require('mongoose').Schema({
+    startDate: {
+        type: Date,
+        required: true
+    },
+    endDate: {
+        type: Date,
+        required: true
+    },
+    startHour: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 23
+    },
+    startMin: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 59
+    },
+    endHour: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 23
+    },
+    endMin: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 59
+    },
+    slotSize: {
+        type: Number,
+        required: true,
+        min: 0
+    }
+});
 
 schema.statics.list = () => {
     return new Promise((resolve, reject) => {

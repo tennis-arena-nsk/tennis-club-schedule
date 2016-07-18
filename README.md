@@ -46,7 +46,27 @@ User makes reservation
 >    System adds reservation to list of user's current reservations. System emails list of current reservations to stuff manager.
     
     
-    
+### Reservation object
+
+_id: reservation ID
+
+resourceId: what court / resource have been reserved
+
+reservedBy: ( -> user._id) who makes this reservation (for regular user  - only own reservations have this field, for stuff members - all)
+
+type: (10=public, 20=private unconfirmed, 30=private confirmed) type of reservation (enum)
+
+title: title for public events (like some competitions)
+
+start, end: start of reservation, end of reservation. Server will see if this time will match working schedule for this day
+
+For FullCalendar events also this field are filled:
+editable: only for own events
+overlap: false
+constraint: server-based working schedule for this day
+
+
+
     
 
 

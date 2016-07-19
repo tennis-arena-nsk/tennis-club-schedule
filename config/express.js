@@ -9,7 +9,7 @@ const contentLength = require('express-content-length-validator')
 const expressValidator = require('express-validator')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
-//const multer = require('multer')
+const helmet = require('helmet')
 const flash = require('express-flash')
 const passport = require('passport')
 //const sass = require('node-sass-middleware');
@@ -17,10 +17,8 @@ const compression = require('compression')
 const path = require('path')
 
 
-exports = module.exports = class ApplicationConfig {
+exports = module.exports = class {
   static init(app) {
-//    const upload = multer({ dest: path.join(__dirname, '../uploads') })
-
     // configure express:
     app.disable('x-powered-by');
     app.set('port', process.env.PORT || 3000);
@@ -37,7 +35,6 @@ exports = module.exports = class ApplicationConfig {
     app.use(contentLength.validateMax({max: 999}));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
-    // app.use(helmet());
     app.use(expressValidator());
 
     // configure sessions:
@@ -55,6 +52,7 @@ exports = module.exports = class ApplicationConfig {
     app.use(passport.session());
 
     app.use(flash());
+    app.use(helmet());
 
     // use friendlier error handler:
     if (process.env.NODE_ENV === 'development') {
@@ -89,12 +87,6 @@ exports = module.exports = class ApplicationConfig {
       }
       next()
     })
-
-    // sass middleware to process frontend:
-    /* app.use(sass({
-     src: path.join(__dirname, 'public'),
-     dest: path.join(__dirname, 'public')
-     })); */
 
     // configure project-wide locals:
     app.locals.projectName = process.env.PROJECT_NAME;

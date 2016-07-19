@@ -3,7 +3,7 @@
 // import core modules:
 const Promise = require('bluebird')
 const express = require('express');
-const dotenv = require('dotenv');
+const dotenv = require('dotenv-safe');
 
 // import app modules:
 const ConfigDatabase = require('./config/database')
@@ -13,7 +13,7 @@ const ConfigPassport = require('./config/passport')
 const ConfigRoutes = require('./config/routes')
 
 // Load environment variables from .env file, where API keys and passwords are configured.
-dotenv.load({ path: '.env.example' })
+dotenv.load()
 
 // create express server
 const app = express()

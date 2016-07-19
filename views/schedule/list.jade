@@ -9,3 +9,10 @@ block content
                   span schedule
                   a(href='/schedule/' + object._id ) ==>
                   span  ( #{object.startDate.toLocaleDateString()} -  #{object.endDate.toLocaleDateString()} )
+
+
+    if user
+        p User #{user.profile.name} logged in
+    else
+        p User not logged in
+

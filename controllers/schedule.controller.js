@@ -45,7 +45,7 @@ exports = module.exports = class {
   // create item
   static create(req,res) {
     console.log( _name + '.controller.create');
-    let _object = req.body;
+    const _object = req.body;
 
     Model.create(_object)
         .then(object => res.status(201).json(object))
@@ -101,5 +101,4 @@ exports = module.exports = class {
         .then(() => res.status(204).end())
         .catch(error => res.status(400).json(error));
   }
-
 }

@@ -11,12 +11,18 @@ const User = require('../models/User');
  */
 exports.getLogin = (req, res) => {
   if (req.user) {
-    return res.redirect('/');
+    return res.redirect( req.session.returnTo || '/');
   }
+
+  if( req.query.origin )
+    req.session.returnTo = req.query.origin
+  else
+    req.session.returnTo = req.header('Referer')
+
   res.render('account/login', {
     title: 'Login'
-  });
-};
+  })
+}
 
 /**
  * POST /login
@@ -43,7 +49,16 @@ exports.postLogin = (req, res, next) => {
     req.logIn(user, (err) => {
       if (err) { return next(err); }
       req.flash('success', { msg: 'Success! You are logged in.' });
-      res.redirect(req.session.returnTo || '/');
+
+      let returnTo = '/'
+
+      if (req.session.returnTo) {
+        returnTo = req.session.returnTo
+        delete req.session.returnTo
+      }
+
+      res.redirect(returnTo);
+
     });
   })(req, res, next);
 };
@@ -54,7 +69,10 @@ exports.postLogin = (req, res, next) => {
  */
 exports.logout = (req, res) => {
   req.logout();
-  res.redirect('/');
+  res.redirect(req.header('Referer') || '/');
+  if (req.session.returnTo) {
+    delete req.session.returnTo
+  }
 };
 
 /**

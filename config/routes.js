@@ -17,9 +17,9 @@ const AuthRouter = require('./routes/auth.router.js')
  */
 const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
-    return next();
+    return next()
   }
-  res.redirect('/login');
+  res.redirect( `/login?origin=${req.path}` )
 };
 
 exports = module.exports = class RoutesConfig {
@@ -38,7 +38,7 @@ exports = module.exports = class RoutesConfig {
     app.get('/signup', userController.getSignup);
     app.post('/signup', userController.postSignup);
 
-    app.get('/contact', contactController.getContact);
+    app.get('/contact', isAuthenticated, contactController.getContact);
     app.post('/contact', contactController.postContact);
 
     app.get('/account', isAuthenticated, userController.getAccount);

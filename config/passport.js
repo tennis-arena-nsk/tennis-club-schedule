@@ -14,7 +14,7 @@ const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const User = require('../models/User');
 
 
-exports = module.exports = class PassportConfig {
+exports = module.exports = class {
   static init(app) {
 
     passport.serializeUser((user, done) => {

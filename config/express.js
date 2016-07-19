@@ -44,6 +44,7 @@ exports = module.exports = class ApplicationConfig {
     app.use(session({
       resave: true,
       saveUninitialized: true,
+      maxAge: 1000 * 60 * 60, // 1 hour ( 1000ms, 60s, 60m)
       secret: process.env.SESSION_SECRET,
       store: new MongoStore({
         url: app.db.uri,
@@ -77,14 +78,17 @@ exports = module.exports = class ApplicationConfig {
       next();
     });
 
-    // ?
-    app.use((req, res, next) => {
-      // After successful login, redirect back to /api, /contact or /
-      if (/(api)|(contact)|(^\/$)/i.test(req.path)) {
-        req.session.returnTo = req.path;
+    String.prototype.startsWith = function(needle)
+    {
+      return(this.indexOf(needle) == 0);
+    };
+
+    app.use(function(req, res, next) {
+      if ( !(req.path == '/login' || req.path.startsWith('/auth/')) && req.session.returnTo) {
+        delete req.session.returnTo
       }
-      next();
-    });
+      next()
+    })
 
     // sass middleware to process frontend:
     /* app.use(sass({

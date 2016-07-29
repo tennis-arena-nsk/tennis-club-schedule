@@ -1,0 +1,40 @@
+extends ../layout
+
+
+block content
+    //- Modal dialog box for item:
+    .modal.fade(id="ItemModal", tabindex="-1", role="dialog")
+        .modal-dialog.modal-lg
+            .modal-content.col-md-10.col-sm-10.col-lg-10.col-xs-10
+                .modal-header
+                    button(type="button", class="close", data-dismiss="modal") x
+                    h3 Resource
+                .modal-body
+                        form.form-horizontal
+                            .form-group
+                                    label(for="form-id") id:
+                                    input.form-control(id="form-id",disabled, placeholder="wnjdjwkdnjnwdnjkwjd")
+                            .form-group
+                                    label(for="form-name") name:
+                                    input.form-control(id="form-name", type="text", placeholder="Resource name")
+                .modal-footer
+                    button.btn.btn-default(type="Button") Save
+
+    //- List template
+    table.table.table-bordered.table-striped
+        tr
+            th Id
+            th Name
+        each object in objects
+            tr
+                td
+                    button.btn(data-toggle="modal", data-target="#ItemModal") Edit
+                td #{object.name}
+
+    if user
+        p User #{user.profile.name} logged in
+    else
+        p User not logged in
+
+
+    button.btn.btn-primary(type="button", data-toggle="modal", data-target="#ItemModal") Launch

@@ -3,18 +3,17 @@ const controller = require('../../controllers/schedule.controller')
 const router = require('express').Router()
 
 exports = module.exports = class {
-  static init( app, mountPath ) {
-    router.route( '/')
+  static init(app, mountPath) {
+    router.route('/')
       .get(controller.list)
       .post(controller.create);
 
-    router.route( '/:id/')
+    router.route('/:id/')
       .get(controller.show)
       .post(controller.update)
       .delete(controller.remove);
 
-    app.use( mountPath, router )
+    app.use(mountPath, router)
   }
-
-
 }
+

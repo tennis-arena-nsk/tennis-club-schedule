@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash')
+
 // project modules:
 const ModelName = 'Reservation'
 const Title = 'Расписание'
@@ -11,11 +13,34 @@ exports = module.exports = class {
   static list(req,res) {
     Model.list()
       .then(objects => {
+        const responseObject = { items : {}, options: {} }
+
+        console.log('Objects:')
+        console.log(objects)
+
+        // if request is done by none-manager account then clear all reservedBy filelds
+        if ( !req.user || (req.user && (req.user.profile.canManageReservations === false))) {
+          console.log('Process reservedBy field')
+          _.each(objects, (item) => {
+              if ( !req.user || item.reservedBy !== req.user._id )
+                item.reservedBy = ''
+            })
+          console.log('Processed objects:')
+          console.log(objects)
+        }
+
+        responseObject.items = objects
+        responseObject.options.canMakeNewReservation = req.user ? req.user.profile.canMakeNewReservation : false
+
+        console.log('Response:')
+        console.log(responseObject)
+
         if (req.accepts(['json','html']) === 'json') {
-          res.status(200).json(objects)
+          res.status(200).json(responseObject)
         } else {
-          res.locals.objects = objects
+          res.locals.objects = responseObject
           res.locals.title = Title
+
           res.render( `${ModelName}/list` )
         }
       })

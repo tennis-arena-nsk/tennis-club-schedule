@@ -23,7 +23,10 @@ let userSchema = new mongoose.Schema({
     gender: { type: String, default: '' },
     location: { type: String, default: '' },
     website: { type: String, default: '' },
-    picture: { type: String, default: '' }
+    picture: { type: String, default: '' },
+    canMakeNewReservation: { type: Boolean, default: true },
+    canManageReservations: { type: Boolean, default: false }
+
   }
 }, { timestamps: true });
 
@@ -57,7 +60,7 @@ userSchema.methods.comparePassword = function (candidatePassword, cb) {
  */
 userSchema.methods.gravatar = function (size) {
   if (!size) {
-    size = 200;
+    size = 100;
   }
   if (!this.email) {
     return `https://gravatar.com/avatar/?s=${size}&d=retro`;

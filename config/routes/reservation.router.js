@@ -8,13 +8,13 @@ const isAuthenticated = require('../isAuthenticated')
 exports = module.exports = class {
   static init( app, mountPath ) {
 
-    router.all('*', isAuthenticated) // apply security for all routes here
+//    router.all('*', isAuthenticated) // apply security for all routes here
 
     router.route( '/')
       .get(controller.list)
-      .post(controller.create);
+      .post(isAuthenticated, controller.create);
 
-    router.route( '/:id/')
+    router.route( '/:id/', isAuthenticated)
       .get(controller.show)
       .post(controller.update)
       .delete(controller.remove);

@@ -8,15 +8,15 @@ mongoose.Promise = bluebird;
 exports = module.exports = class Database {
   static init(app) {
     // setup mongo / mongoose:
-    const dbUri = process.env.MONGODB_URI
+    const dbUri = process.env.MONGODB_URI + process.env.NODE_ENV
 
     mongoose.connect( dbUri )
     app.db = mongoose.connection;
-    app.db.uri = process.env.MONGODB_URI || process.env.MONGOLAB_URI
+    app.db.uri = dbUri
 //    app.db.on('error', console.error.bind(console, 'mongoose connection error: '));
-    /* app.db.once('open', function () {
-      console.log('Database connected');
-    }); */
+    app.db.once('open', () => {
+      console.log(`Database ${dbUri} connected`);
+    })
 
   }
 }; 

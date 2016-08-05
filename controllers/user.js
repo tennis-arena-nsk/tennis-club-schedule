@@ -95,14 +95,22 @@ exports.getSignup = (req, res) => {
 exports.postSignup = (req, res, next) => {
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password must be at least 4 characters long').len(4);
-  req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
+
+  if (!req.accepts('json')) {
+    req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
+  }
   req.sanitize('email').normalizeEmail({ remove_dots: false });
 
   const errors = req.validationErrors();
 
   if (errors) {
-    req.flash('errors', errors);
-    return res.redirect('/signup');
+    if (req.accepts('json')) {
+      return res.status(400).json(errors)
+    } else {
+      req.flash('errors', errors);
+      return res.status(400).redirect('/signup');
+    }
+
   }
 
   const user = new User({
@@ -111,20 +119,42 @@ exports.postSignup = (req, res, next) => {
   });
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
-    if (existingUser) {
-      req.flash('errors', { msg: 'Account with that email address already exists.' });
-      return res.redirect('/signup');
+    if (existingUser || err ) {
+      if (req.accepts('json')) {
+        res.statusCode = 400
+        return next(err || new Error('Account with that email address already exists.'))
+      } else {
+        req.flash('errors', {msg: err ? err.message :'Account with that email address already exists.'});
+        return res.redirect('/signup');
+      }
     }
-    user.save((err) => {
-      if (err) { return next(err); }
+  })
+
+  user.save()
+    .then( (user) => {
       req.logIn(user, (err) => {
         if (err) {
           return next(err);
         }
-        res.redirect('/');
-      });
-    });
-  });
+        if (req.accepts('json')) {
+          return res.status(201).json(user)
+        } else {
+          return res.redirect('/');
+        }
+      })
+    })
+    .catch( (error) => {
+      if (req.accepts('json')) {
+        return res.status(400).json(error)
+      } else {
+        res.locals.objects = error
+        res.locals.http_error_code=400
+        return res.status(400).render( 'html/400')
+      }
+
+    })
+
+
 };
 
 /**
@@ -161,6 +191,7 @@ exports.postUpdateProfile = (req, res, next) => {
     user.profile.website = req.body.website || ''
     user.profile.canMakeNewReservation = req.body.canMakeNewReservation ? true : false
     user.profile.canManageReservations = req.body.canManageReservations ? true : false
+    user.profile.canManageUsers = req.body.canManageUsers ? true : false
 
     user.save((err) => {
       if (err) {

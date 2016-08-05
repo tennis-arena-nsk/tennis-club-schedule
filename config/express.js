@@ -3,6 +3,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
+const winston = require('winston')
 const errorHandler = require('errorhandler')
 const lusca = require('lusca')
 const contentLength = require('express-content-length-validator')
@@ -15,6 +16,7 @@ const passport = require('passport')
 //const sass = require('node-sass-middleware');
 const compression = require('compression')
 const path = require('path')
+const mongoose = require('mongoose')
 
 
 exports = module.exports = class {
@@ -29,7 +31,31 @@ exports = module.exports = class {
       return req.accepts()
     })
 
-    app.use(morgan(':method :url :status < :accepts > :response-time'));
+
+    // init loggers:
+    var logger = {}
+    if (process.env.NODE_ENV !== 'test') {
+      console.log('Development logger')
+       logger = new (winston.Logger)({
+        transports: [
+          new (winston.transports.Console)(),
+          new (winston.transports.File)({ filename: 'app.log' })
+        ]
+      })
+      app.use(morgan(':method :url :status < :accepts > :response-time'));
+    } else {
+      console.log('Test logger')
+      // while testing, log only to file, leaving stdout free for unit test status messages
+      logger = new (winston.Logger)({
+        transports: [
+          new (winston.transports.File)({ filename: 'app.log' })
+        ]
+      })
+    }
+
+    app.db.on('error', function(err) {
+      logger.error('MongoDB event error: ' + err);
+    });
 
     app.use(compression());
     app.use(contentLength.validateMax({max: 999}));

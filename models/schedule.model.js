@@ -73,13 +73,13 @@ schema.statics.show = id =>
     })
 
 
-schema.statics.create = anObject =>
+schema.statics.create = (anObject) =>
     new Promise((resolve, reject) => {
         if (!_.isObject(anObject)) {
             return reject(new TypeError(ModelName + str.objectParamNotValid))
         }
 
-        let _object = new Model( anObject);
+        const _object = new Model( anObject);
 
         _object.save((err, saved) => {
             err ? reject(err) : resolve(saved);

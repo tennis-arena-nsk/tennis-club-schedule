@@ -1,7 +1,6 @@
 'use strict';
 
 // import core modules:
-const Promise = require('bluebird')
 const express = require('express');
 const dotenv = require('dotenv-safe');
 

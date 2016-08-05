@@ -5,9 +5,9 @@ const bcrypt = require('bcrypt-nodejs');
 const crypto = require('crypto');
 
 
-let userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },
-  phone: { type: String, unique: true },
+  phone: { type: String },
   password: String,
   passwordResetToken: String,
   passwordResetExpires: Date,
@@ -25,8 +25,8 @@ let userSchema = new mongoose.Schema({
     website: { type: String, default: '' },
     picture: { type: String, default: '' },
     canMakeNewReservation: { type: Boolean, default: true },
-    canManageReservations: { type: Boolean, default: false }
-
+    canManageReservations: { type: Boolean, default: false },
+    canManageUsers: { type: Boolean, default: false }
   }
 }, { timestamps: true });
 

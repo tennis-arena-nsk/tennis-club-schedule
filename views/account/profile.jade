@@ -37,12 +37,15 @@ block content
     .form-group
       label.col-sm-3.control-label Permissions
       .col-sm-7
-        label.checkbox-inline.col-sm-4
+        label.checkbox-inline.col-sm-3
           input(type='checkbox', name='canMakeNewReservation', id='canMakeNewReservation', checked = user.profile.canMakeNewReservation ? "checked" : undefined  )
           span Can make new reservations
-        label.checkbox-inline.col-sm-3
+        label.checkbox-inline.col-sm-2
           input(type='checkbox', name='canManageReservations', id='canManageReservations', checked = user.profile.canManageReservations ? "checked" : undefined  )
           span Manage reservations
+        label.checkbox-inline.col-sm-2
+          input(type='checkbox', name='canManageUsers', id='canManageUsers', checked = user.profile.canManageUsers ? "checked" : undefined  )
+          span Manage users
     .form-group
       label.col-sm-3.control-label(for='gravatar') Gravatar
       .col-sm-4

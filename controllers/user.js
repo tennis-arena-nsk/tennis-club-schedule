@@ -92,7 +92,7 @@ exports.getSignup = (req, res) => {
  * POST /signup
  * Create a new local account.
  */
-exports.postSignup = (req, res, next) => {
+exports.postSignup = (req, res) => {
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password must be at least 4 characters long').len(4);
 
@@ -121,40 +121,43 @@ exports.postSignup = (req, res, next) => {
   User.findOne({ email: req.body.email }, (err, existingUser) => {
     if (existingUser || err ) {
       if (req.accepts('json')) {
-        res.statusCode = 400
-        return next(err || new Error('Account with that email address already exists.'))
+        return res.status(400).json( err || new Error('Account with that email address already exists.') )
       } else {
         req.flash('errors', {msg: err ? err.message :'Account with that email address already exists.'});
         return res.redirect('/signup');
       }
     }
-  })
 
-  user.save()
-    .then( (user) => {
-      req.logIn(user, (err) => {
-        if (err) {
-          return next(err);
-        }
+    user.save()
+      .then( (user) => {
+        req.logIn(user, (err) => {
+          if (err) {
+            if (req.accepts('json')) {
+              return res.status(400).json( {error: err || new Error('Failed to login') } )
+            } else {
+              req.flash('errors', {msg: err ? err.message :'Failed to login'});
+              return res.redirect('/');
+            }
+
+          }
+          if (req.accepts('json')) {
+            return res.status(201).json(user)
+          } else {
+            return res.status(201).redirect('/');
+          }
+        })
+      })
+      .catch( (error) => {
         if (req.accepts('json')) {
-          return res.status(201).json(user)
+          return res.status(400).json(error)
         } else {
-          return res.redirect('/');
+          res.locals.objects = error
+          res.locals.http_error_code=400
+          return res.status(400).render( 'html/400')
         }
       })
-    })
-    .catch( (error) => {
-      if (req.accepts('json')) {
-        return res.status(400).json(error)
-      } else {
-        res.locals.objects = error
-        res.locals.http_error_code=400
-        return res.status(400).render( 'html/400')
-      }
 
-    })
-
-
+  })
 };
 
 /**

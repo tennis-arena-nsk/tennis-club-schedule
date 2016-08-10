@@ -22,13 +22,11 @@ describe('User Model', () => {
       email: 'test@gmail.com',
       password: 'password'
     });
-      user.save( (err) => {
+      user.save( (err, savedUser) => {
         expect(err).to.be.defined;
-        expect(err.code).to.be.defined;
-        expect(err.code).to.equal(11000);
+        expect( err.code ).to.be.defined;
+        expect( err.code ).to.equal(11000);
       })
-        .catch((err) => {
-        })
   });
 
   it('should find user by email', () => {

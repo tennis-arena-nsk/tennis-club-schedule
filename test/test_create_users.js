@@ -1,5 +1,4 @@
 "use strict";
-process.env.MONGODB_URI = 'mongodb://localhost:27017/testUsers'
 
 const supertest = require('supertest');
 const should = require('should')

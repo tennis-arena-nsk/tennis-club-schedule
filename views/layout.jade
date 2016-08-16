@@ -7,15 +7,19 @@ html
     meta(name='theme-color' content='#4DA5F4')
     meta(name='csrf-token', content=_csrf)
     title #{title} - Tennis-Arena
-    link(rel='shortcut icon', href='/favicon.png')
-    link(rel='stylesheet', href='/css/main.css')
-    if title == "Расписание"
-      link(rel="stylesheet", href="/css/fullcalendar.min.css")
-      link(rel="stylesheet", href="/css/scheduler.min.css")
-      script(src="/js/lib/moment.min.js")
-      script(src='/js/lib/jquery-2.2.0.min.js')
-      script(src='/js/lib/fullcalendar.min.js')
-      script(src='/js/lib/scheduler.min.js')
+
+    block headCss
+      link(rel='shortcut icon', href='/favicon.png')
+      link(rel='stylesheet', href='/css/main.css')
+
+    block headScripts
+      if title == "Расписание"
+        link(rel="stylesheet", href="/css/fullcalendar.min.css")
+        link(rel="stylesheet", href="/css/scheduler.min.css")
+        script(src="/js/lib/moment.min.js")
+        script(src='/js/lib/jquery-2.2.0.min.js')
+        script(src='/js/lib/fullcalendar.min.js')
+        script(src='/js/lib/scheduler.min.js')
 
   body
     include partials/header

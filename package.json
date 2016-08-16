@@ -19,6 +19,7 @@
     "cheerio": "^0.20.0",
     "clockwork": "^0.1.4",
     "compression": "^1.6.2",
+    "connect-acceptoverride": "0.0.3",
     "connect-mongo": "^1.1.0",
     "dotenv": "^2.0.0",
     "dotenv-safe": "^2.3.1",

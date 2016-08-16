@@ -17,6 +17,7 @@ const passport = require('passport')
 const compression = require('compression')
 const path = require('path')
 const mongoose = require('mongoose')
+const acceptOverride = require('connect-acceptoverride');
 
 
 exports = module.exports = class {
@@ -59,6 +60,7 @@ exports = module.exports = class {
 
     app.use(compression());
     app.use(contentLength.validateMax({max: 999}));
+    app.use(acceptOverride());
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(expressValidator());

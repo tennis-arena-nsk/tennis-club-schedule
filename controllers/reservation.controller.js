@@ -15,9 +15,6 @@ exports = module.exports = class {
       .then(objects => {
         const responseObject = { items : {}, options: {} }
 
-        console.log('Objects:')
-        console.log(objects)
-
         // if request is done by none-manager account then clear all reservedBy filelds
         if ( !req.user || (req.user && (req.user.profile.canManageReservations === false))) {
           console.log('Process reservedBy field')
@@ -36,21 +33,21 @@ exports = module.exports = class {
         console.log(responseObject)
 
         if (req.accepts(['json','html']) === 'json') {
-          res.status(200).json(responseObject)
+          return res.status(200).json(responseObject)
         } else {
           res.locals.objects = responseObject
           res.locals.title = Title
 
-          res.render( `${ModelName}/list` )
+          return res.render( `${ModelName}/list` )
         }
       })
       .catch(error => {
         if (req.accepts('json')) {
-          res.status(400).json(error)
+          return res.status(400).json(error)
         } else {
           res.locals.objects = error
           res.locals.http_error_code=400
-          res.status(400).render( 'html/400')
+          return res.status(400).render( 'html/400')
         }
 
       });

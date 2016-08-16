@@ -10,40 +10,49 @@ exports = module.exports = class {
   static list(req,res) {
     Model.list()
       .then(objects => {
-        if (req.accepts(['json','html']) === 'json') {
-          res.status(200).json(objects)
-        } else {
-          res.locals.objects = objects
-          res.render( `${ModelName}/list` )
-        }
-      })
-      .catch(error => {
-        if (req.accepts('json')) {
-          res.status(400).json(error)
-        } else {
-          res.locals.objects = error
-          res.locals.http_error_code=400
-          res.status(400).render( 'html/400')
-        }
+        res.format({
+          html: () => {
+            res.locals.objects = objects
+            res.render( `${ModelName}/list`)
+          },
 
-      });
+          json: () => {
+            res.status(200).json(objects)
+          }
+        })
+      })
+      .catch(error =>
+        res.format({
+          html: () => {
+            res.locals.objects = error
+            res.locals.http_error_code = 400
+            res.status(400).render( 'html/400')
+          },
+
+          json: () => {
+            res.status(400).json(error)
+          }
+        })
+      )
   }
 
-  // create item
+  // create item, only json:
   static create(req,res) {
-    const _object = req.body;
-
-    Model.create(_object)
+    Model.create(req.body)
       .then(object => res.status(201).json(object))
-      .catch(error => {
-        if (req.accepts('json')) {
-          res.status(400).json(error)
-        } else {
-          res.locals.objects = error
-          res.locals.http_error_code=400
-          res.status(400).render( 'html/400')
-        }
-      });
+      .catch(error =>
+        res.format({
+          html: () => {
+            res.locals.objects = error
+            res.locals.http_error_code = 400
+            res.status(400).render( 'html/400')
+          },
+
+          json: () => {
+            res.status(400).json(error)
+          }
+        })
+      )
   }
 
   // show single item
@@ -52,15 +61,19 @@ exports = module.exports = class {
       .then(item => {
         res.status(200).json(item)
       })
-      .catch(error => {
-        if (req.accepts(['json','html']) === 'json') {
-          res.status(400).json(error)
-        } else {
-          res.locals.objects = error
-          res.locals.http_error_code = 400
-          res.status(400).render( 'html/400')
-        }
-      });
+      .catch(error =>
+        res.format({
+          html: () => {
+            res.locals.objects = error
+            res.locals.http_error_code = 400
+            res.status(400).render( 'html/400')
+          },
+
+          json: () => {
+            res.status(400).json(error)
+          }
+        })
+      )
 
   }
 
@@ -71,14 +84,38 @@ exports = module.exports = class {
 
     Model.update(_id, _object)
       .then(object => res.status(200).json(object))
-      .catch(error => res.status(400).json(error));
+      .catch(error =>
+        res.format({
+          html: () => {
+            res.locals.objects = error
+            res.locals.http_error_code = 400
+            res.status(400).render( 'html/400')
+          },
+
+          json: () => {
+            res.status(400).json(error)
+          }
+        })
+      )
   }
 
   // delete item
   static remove(req,res) {
     Model.remove(req.params.id)
       .then(() => res.status(204).end())
-      .catch(error => res.status(400).json(error));
+      .catch(error =>
+        res.format({
+          html: () => {
+            res.locals.objects = error
+            res.locals.http_error_code = 400
+            res.status(400).render( 'html/400')
+          },
+
+          json: () => {
+            res.status(400).json(error)
+          }
+        })
+      )
   }
 
 }

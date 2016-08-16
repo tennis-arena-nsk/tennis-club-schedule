@@ -23,6 +23,7 @@ describe('User Model', () => {
       password: 'password'
     });
       user.save( (err, savedUser) => {
+        expect(err).not.to.be.null;
         expect(err).to.be.defined;
         expect( err.code ).to.be.defined;
         expect( err.code ).to.equal(11000);

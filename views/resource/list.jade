@@ -1,5 +1,8 @@
 extends ../layout
 
+append headCss
+    link(rel='stylesheet', href='https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css')
+
 
 block content
     //- Modal dialog box for item:
@@ -13,7 +16,7 @@ block content
                         form.form-horizontal
                             .form-group
                                     label(for="form-id") id:
-                                    input.form-control(id="form-id",disabled, placeholder="wnjdjwkdnjnwdnjkwjd")
+                                    input.form-control(id="form-id",disabled, placeholder="id")
                             .form-group
                                     label(for="form-name") name:
                                     input.form-control(id="form-name", type="text", placeholder="Resource name")
@@ -21,15 +24,18 @@ block content
                     button.btn.btn-default(type="Button") Save
 
     //- List template
-    table.table.table-bordered.table-striped
-        tr
-            th Id
-            th Name
-        each object in objects
+    table(id="table").table.table-bordered.table-striped
+
+        thead
             tr
-                td
-                    button.btn(data-toggle="modal", data-target="#ItemModal") Edit
-                td #{object.name}
+                th Id
+                th Name
+
+        tfoot
+            tr
+                th Id
+                th Name
+
 
     if user
         p User #{user.profile.name} logged in
@@ -38,3 +44,33 @@ block content
 
 
     button.btn.btn-primary(type="button", data-toggle="modal", data-target="#ItemModal") Launch
+
+
+append scripts
+    script(src='/js/lib/jquery-2.2.0.min.js')
+    script(src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
+    script(src='https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js')
+
+    script.
+        $(document).ready( function() {
+            var table = $('#table').DataTable({
+                "processing": true,
+                "ajax": {
+                    "url": "/resource",
+                    "method": "GET",
+                    "error": function( xhr, textStatus, error) {
+                        console.log( textStatus )
+                        console.log( error )
+
+                    },
+                    "dataSrc": ''
+
+                },
+
+                "columns": [
+                    { data: "_id" },
+                    { data: "name" }
+                ]
+
+            });
+        })

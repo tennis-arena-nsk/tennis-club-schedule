@@ -82,6 +82,8 @@ exports = module.exports = class {
     const _id = req.params.id;
     const _object = req.body;
 
+    console.log( _object )
+
     Model.update(_id, _object)
       .then(object => res.status(200).json(object))
       .catch(error =>

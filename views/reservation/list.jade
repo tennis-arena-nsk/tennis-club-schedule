@@ -1,5 +1,16 @@
 extends ../layout
 
+append headScripts
+    link(rel="stylesheet", href="/css/fullcalendar.min.css")
+    link(rel="stylesheet", href="/css/scheduler.min.css")
+    script(src='/js/lib/jquery-2.2.0.min.js')
+    script(src="/js/lib/moment.min.js")
+    script(src='/js/lib/bootstrap.min.js')
+    script(src='/js/lib/fullcalendar.min.js')
+    script(src='/js/lib/scheduler.min.js')
+
+block scripts
+
 block content
     h2 Расписание теннисных кортов Теннис-Арены
     hr

@@ -13,13 +13,6 @@ html
       link(rel='stylesheet', href='/css/main.css')
 
     block headScripts
-      if title == "Расписание"
-        link(rel="stylesheet", href="/css/fullcalendar.min.css")
-        link(rel="stylesheet", href="/css/scheduler.min.css")
-        script(src="/js/lib/moment.min.js")
-        script(src='/js/lib/jquery-2.2.0.min.js')
-        script(src='/js/lib/fullcalendar.min.js')
-        script(src='/js/lib/scheduler.min.js')
 
   body
     include partials/header
@@ -31,11 +24,8 @@ html
     include partials/footer
 
     block scripts
-      unless title=="Расписание"
-        script(src='/js/lib/jquery-2.2.0.min.js')
-
+      script(src='/js/lib/jquery-2.2.0.min.js')
       script(src='/js/lib/bootstrap.min.js')
-      script(src='/js/main.js')
 
 
 

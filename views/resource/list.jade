@@ -1,60 +1,86 @@
 extends ../layout
 
-append headCss
-    link(rel='stylesheet', href='https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css')
-
 
 block content
     //- Modal dialog box for item:
-    .modal.fade(id="ItemModal", tabindex="-1", role="dialog")
+    .modal.fade(id="modal-form", tabindex="-1", role="dialog")
         .modal-dialog.modal-lg
             .modal-content.col-md-10.col-sm-10.col-lg-10.col-xs-10
                 .modal-header
                     button(type="button", class="close", data-dismiss="modal") x
-                    h3 Resource
+                    h3(id="modal-title") Resource
                 .modal-body
-                        form.form-horizontal
+                        form(id="form-item").form-horizontal
                             .form-group
-                                    label(for="form-id") id:
-                                    input.form-control(id="form-id",disabled, placeholder="id")
-                            .form-group
-                                    label(for="form-name") name:
-                                    input.form-control(id="form-name", type="text", placeholder="Resource name")
+                                label(for="form-id") Id:
+                                input.form-control(id="form-id", name="_id", disabled, type="text", placeholder="Id")
+
+                                label(for="form-name") name:
+                                input.form-control(id="form-name", name="name", type="text", placeholder="Resource name")
                 .modal-footer
-                    button.btn.btn-default(type="Button") Save
+                    button.btn.btn-primary(id="form-save-btn",type="Button",onclick="saveItem()") Save
+
+
+    // Modal Dialog for delete item confirmation
+    .modal.fade(id="confirm-delete",role="dialog")
+
+        .modal-dialog.modal-lg
+            .modal-content
+                .modal-header
+                    button(type="button",class="close", data-dismiss="modal", aria-hidden="true") &times;
+                    h3.modal-title  Confirm delete
+
+                .modal-body
+                    p Are you sure about this ?
+
+                .modal-footer
+                    button.btn.btn-default(type="button", data-dismiss="modal") Cancel
+                    button.btn.btn-danger(type="button", id="confirm-delete-ok") Ok
+
+    div(id="alert-placeholder")
+
+    h3 Resources
+    br
+    button.btn.btn-success(onclick="addItem()")
+        i.glyphicon.glyphicon-plus  Add
+    button.btn.btn-default(onclick="reloadTable()")
+        i.glyphicon.glyphicon-refresh  Reload
+    br
 
     //- List template
     table(id="table").table.table-bordered.table-striped
 
         thead
             tr
-                th Id
                 th Name
-
-        tfoot
-            tr
-                th Id
-                th Name
+                th Actions
 
 
-    if user
-        p User #{user.profile.name} logged in
-    else
-        p User not logged in
-
-
-    button.btn.btn-primary(type="button", data-toggle="modal", data-target="#ItemModal") Launch
-
+append headCss
+    link(rel='stylesheet', href="https://cdn.datatables.net/v/bs/dt-1.10.12/b-1.2.2/r-2.1.0/se-1.2.0/datatables.min.css")
 
 append scripts
-    script(src='/js/lib/jquery-2.2.0.min.js')
-    script(src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
-    script(src='https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js')
+    script(src="https://cdn.datatables.net/v/bs/dt-1.10.12/b-1.2.2/r-2.1.0/se-1.2.0/datatables.min.js")
 
     script.
+        var save_method
+        var table
+        var item_url
+
+        var anObject = {}
+
+        $('#modal-form').on('shown.bs.modal', function () {
+            $('#form-name').focus();
+        })
+
         $(document).ready( function() {
-            var table = $('#table').DataTable({
-                "processing": true,
+            table = $('#table').DataTable({
+                "processing": false,
+                "searching": false,
+                "lengthChange": false,
+                "pageLength": 50,
+                "info": false,
+                "select": false,
                 "ajax": {
                     "url": "/resource",
                     "method": "GET",
@@ -68,9 +94,184 @@ append scripts
                 },
 
                 "columns": [
-                    { data: "_id" },
-                    { data: "name" }
-                ]
+                    {   data: "name" },
+                    {
+                        width: "20%",
+                        render: function(data,type,row,meta) {
+                            return "<a class='btn btn-sm btn-primary' onclick='editItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-pencil'></i> Edit</a>" +
+                                "<a class='btn btn-sm btn-danger' onclick='deleteItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-trash'></i> Delete</a>";
+                        }
+                    }
+                ] /* ,
+                dom: 'Bfrtip',
+                buttons: [
+                        {
+                            text: 'New Resource',
+                            action: function (ev, dt, node, config) {
+                                $('#modal-form').modal('show')
+                            }
+                        },
+                        {
+                        text: 'Reload',
+                        action: function (ev, dt, node, config) {
+                            dt.ajax.reload();
+                        }
+                    }
+                ] */
 
             });
+
+            /*
+            $('#table tbody').on('click', 'tr', function () {
+
+                anObject = table.row(this).data()
+
+                $("#form-name").val( anObject.name )
+                $('#modal-form').modal('show')
+                $("#form-name").focus()
+
+                console.log( anObject);
+            }); */
+
         })
+
+        function resetForm() {
+            $('form')[0].reset(); // reset form on modals
+            $('.form-group').removeClass('has-error'); // clear error class
+            $('.help-block').empty(); // clear error string
+
+        }
+
+        function editItem(id) {
+            save_method = 'POST';
+            item_url = '/resource/'+id
+
+            resetForm()
+
+            //Ajax Load data from ajax
+            $.ajax({
+                url: item_url,
+                type: "GET",
+                dataType: "JSON",
+                success: function (data) {
+
+                    anObject = data
+                    $('#form-id').val(data._id);
+                    $('#form-name').val(data.name);
+                    $('#modal-form').modal('show'); // show bootstrap modal when complete loaded
+                    $('#modal-title').text('Edit Resource'); // Set title to Bootstrap modal title
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Error get data from server');
+                }
+            });
+
+        }
+
+        function addItem() {
+            save_method = 'POST';
+            item_url = '/resource'
+
+            resetForm()
+            $('#modal-form').modal('show'); // show bootstrap modal
+            $('#modal-title').text('Add Resource'); // Set Title to Bootstrap modal title
+        }
+
+        function deleteItem(id) {
+            item_url = '/resource/'+id
+
+            $('#confirm-delete').modal('show'); // show bootstrap modal
+        }
+
+        $('#confirm-delete-ok').click( function(){
+            var btn = $('#confirm-delete-ok')
+            btn.text('...'); //change button text
+            btn.attr('disabled', true); //set button disable
+
+            // ajax delete data on server
+            $.ajax({
+                url: item_url,
+                type: "DELETE",
+                dataType: "JSON",
+                complete: function (data) {
+                    //if success reload ajax table
+                    btn.text('Ok')
+                    btn.attr('disabled', false); //set button disable
+
+                    $('#confirm-delete').modal('hide'); // show bootstrap modal
+                    reloadTable();
+                    flashSuccess('Item deleted')
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    flashError('Error deleting data');
+                }
+            });
+
+        })
+
+        var ndx = 0
+
+        function showalert(message, alerttype) {
+            ndx = ndx + 1
+            var alertNdx = 'alertdiv' + ndx.toString()
+
+            $('#alert-placeholder').append('<div id="'+alertNdx+'" class="alert ' + alerttype + '"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>')
+
+            setTimeout(function () { // this will automatically close the alert and remove this if the users doesnt close it in 5 secs
+                console.log( 'remove - ' + alertNdx)
+                $("#"+alertNdx).remove();
+            }, 3000);
+        }
+
+        function flashError( msg ) {
+            showalert(msg,'alert-error')
+        }
+
+        function flashSuccess(msg) {
+            showalert(msg,'alert-success')
+        }
+
+        function reloadTable() {
+            table.ajax.reload()
+        }
+
+        function form_to_json(selector) {
+            var ary = $(selector).serializeArray();
+            var obj = {};
+            for (var a = 0; a < ary.length; a++) obj[ary[a].name] = ary[a].value;
+            return JSON.stringify(obj);
+        }
+
+        function saveItem() {
+            var btn = $('#form-save-btn')
+            btn.text('saving...'); //change button text
+            btn.attr('disabled', true); //set button disable
+
+            $.ajax({
+                url: item_url,
+                type: save_method,
+                headers: {
+                    Accept: "application/json; charset=utf-8",
+                    "Content-Type": "application/json; charset=utf-8"
+                },
+                data: form_to_json('form'),
+                dataType: "JSON",
+                success: function (data, status) {
+                    if (status) //if success close modal and reload ajax table
+                    {
+                        $('#modal-form').modal('hide');
+                        reloadTable();
+                    }
+
+                    btn.text('save'); //change button text
+                    btn.attr('disabled', false); //set button enable
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Error saving data to server');
+                    btn.text('save'); //change button text
+                    btn.attr('disabled', false); //set button enable
+
+                }
+            });
+        }

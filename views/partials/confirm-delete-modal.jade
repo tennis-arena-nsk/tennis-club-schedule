@@ -1,0 +1,15 @@
+// Modal Dialog for delete item confirmation
+.modal.fade(id="confirm-delete",role="dialog")
+
+    .modal-dialog.modal-lg
+        .modal-content
+            .modal-header
+                button(type="button",class="close", data-dismiss="modal", aria-hidden="true") &times;
+                h3.modal-title  Confirm delete
+
+            .modal-body
+                p Are you sure about this ?
+
+            .modal-footer
+                button.btn.btn-default(type="button", data-dismiss="modal") Cancel
+                button.btn.btn-danger(type="button", id="confirm-delete-ok") Ok

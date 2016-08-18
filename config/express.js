@@ -117,9 +117,10 @@ exports = module.exports = class {
     })
 
     // configure project-wide locals:
-    app.locals.projectName = process.env.PROJECT_NAME;
-    app.locals.companyName = process.env.COMPANY_NAME;
-    app.locals.copyrightYear = new Date().getFullYear();
+    app.locals.projectName = process.env.PROJECT_NAME
+    app.locals.companyName = process.env.COMPANY_NAME
+    app.locals.copyrightYear = new Date().getFullYear()
+    app.locals.basedir = app.get('views')
 
     // configure serving of static files:
     app.use(express.static(path.join(__dirname, '../public'), { maxAge: 31557600000 }));

@@ -9,7 +9,7 @@ exports = module.exports = class {
   // list all items
   static list(req,res) {
     Model.list()
-      .then(objects => {
+      .then(objects =>
         res.format({
           html: () => {
             res.locals.objects = objects
@@ -20,7 +20,7 @@ exports = module.exports = class {
             res.status(200).json(objects)
           }
         })
-      })
+      )
       .catch(error =>
         res.format({
           html: () => {
@@ -36,7 +36,7 @@ exports = module.exports = class {
       )
   }
 
-  // create item, only json:
+  // create item
   static create(req,res) {
     Model.create(req.body)
       .then(object => res.status(201).json(object))
@@ -58,9 +58,7 @@ exports = module.exports = class {
   // show single item
   static show(req,res) {
     Model.show(req.params.id)
-      .then(item => {
-        res.status(200).json(item)
-      })
+      .then(item => res.status(200).json(item) )
       .catch(error =>
         res.format({
           html: () => {
@@ -74,15 +72,12 @@ exports = module.exports = class {
           }
         })
       )
-
   }
 
   // update item
   static update(req,res) {
     const _id = req.params.id;
     const _object = req.body;
-
-    console.log( _object )
 
     Model.update(_id, _object)
       .then(object => res.status(200).json(object))
@@ -91,7 +86,7 @@ exports = module.exports = class {
           html: () => {
             res.locals.objects = error
             res.locals.http_error_code = 400
-            res.status(400).render( 'html/400')
+            res.status(400).render('html/400')
           },
 
           json: () => {
@@ -110,7 +105,7 @@ exports = module.exports = class {
           html: () => {
             res.locals.objects = error
             res.locals.http_error_code = 400
-            res.status(400).render( 'html/400')
+            res.status(400).render('html/400')
           },
 
           json: () => {
@@ -119,5 +114,4 @@ exports = module.exports = class {
         })
       )
   }
-
 }

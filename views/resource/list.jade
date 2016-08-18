@@ -2,44 +2,33 @@ extends ../layout
 
 
 block content
-    //- Modal dialog box for item:
+    - var ResourceName = 'Resource'
+    - var ResourceUrl = '/resource'
+
+    // Modal dialog box for editing/adding resource's item:
     .modal.fade(id="modal-form", tabindex="-1", role="dialog")
         .modal-dialog.modal-lg
             .modal-content.col-md-10.col-sm-10.col-lg-10.col-xs-10
                 .modal-header
                     button(type="button", class="close", data-dismiss="modal") x
-                    h3(id="modal-title") Resource
+                    h3(id="modal-title") #{ResourceName}
                 .modal-body
-                        form(id="form-item").form-horizontal
-                            .form-group
-                                label(for="form-id") Id:
-                                input.form-control(id="form-id", name="_id", disabled, type="text", placeholder="Id")
+                    form(id="form-item").form-horizontal
+                        .form-group
+                            label(for="form-id") Id:
+                            input.form-control(id="form-id", name="_id", disabled, type="text", placeholder="Id")
 
-                                label(for="form-name") name:
-                                input.form-control(id="form-name", name="name", type="text", placeholder="Resource name")
+                            label(for="form-name") name:
+                            input.form-control(id="form-name", name="name", type="text", placeholder="Resource name")
                 .modal-footer
                     button.btn.btn-primary(id="form-save-btn",type="Button",onclick="saveItem()") Save
 
 
-    // Modal Dialog for delete item confirmation
-    .modal.fade(id="confirm-delete",role="dialog")
-
-        .modal-dialog.modal-lg
-            .modal-content
-                .modal-header
-                    button(type="button",class="close", data-dismiss="modal", aria-hidden="true") &times;
-                    h3.modal-title  Confirm delete
-
-                .modal-body
-                    p Are you sure about this ?
-
-                .modal-footer
-                    button.btn.btn-default(type="button", data-dismiss="modal") Cancel
-                    button.btn.btn-danger(type="button", id="confirm-delete-ok") Ok
+    include /partials/confirm-delete-modal
 
     div(id="alert-placeholder")
 
-    h3 Resources
+    h3 #{ResourceName}
     br
     button.btn.btn-success(onclick="addItem()")
         i.glyphicon.glyphicon-plus  Add
@@ -57,21 +46,71 @@ block content
 
 
 append headCss
-    link(rel='stylesheet', href="https://cdn.datatables.net/v/bs/dt-1.10.12/b-1.2.2/r-2.1.0/se-1.2.0/datatables.min.css")
+    include /partials/datatables.css.jade
 
 append scripts
-    script(src="https://cdn.datatables.net/v/bs/dt-1.10.12/b-1.2.2/r-2.1.0/se-1.2.0/datatables.min.js")
+    include /partials/datatables.js.jade
+
 
     script.
+        "use strict;"
+
+        var ResourceName = "!{ResourceName}"
+        var ResourceUrl = "!{ResourceUrl}"
+
         var save_method
         var table
         var item_url
 
         var anObject = {}
 
+        var strSave = 'Save',
+            strOk = 'Ok',
+            strEdit = 'Edit',
+            strDeleting = 'Deleting ...',
+            strAdd = 'Save new',
+            strSaving = 'Saving ...'
+
+        // Focus first field in edit modal:
         $('#modal-form').on('shown.bs.modal', function () {
             $('#form-name').focus();
         })
+
+        var ndx = 0
+
+        function showalert(message, alerttype) {
+            ndx = ndx + 1
+            var alertNdx = 'alertdiv' + ndx.toString()
+
+            $('#alert-placeholder').append('<div id="' + alertNdx + '" class="alert ' + alerttype + '"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>')
+
+            setTimeout(function () { // this will automatically close the alert and remove this if the users doesnt close it in 5 secs
+                $("#" + alertNdx).remove();
+            }, 4500);
+        }
+
+        function flashError(msg) {
+            showalert(msg, 'alert-danger')
+        }
+
+        function flashSuccess(msg) {
+            showalert(msg, 'alert-success')
+        }
+
+        function resetForm() {
+            $('form')[0].reset(); // reset form on modals
+            $('.form-group').removeClass('has-error'); // clear error class
+            $('.help-block').empty(); // clear error string
+
+        }
+
+        function form_to_json(selector) {
+            var ary = $(selector).serializeArray();
+            var obj = {};
+            for (var a = 0; a < ary.length; a++) obj[ary[a].name] = ary[a].value;
+            return JSON.stringify(obj);
+        }
+
 
         $(document).ready( function() {
             table = $('#table').DataTable({
@@ -82,15 +121,12 @@ append scripts
                 "info": false,
                 "select": false,
                 "ajax": {
-                    "url": "/resource",
+                    "url": ResourceUrl,
                     "method": "GET",
                     "error": function( xhr, textStatus, error) {
-                        console.log( textStatus )
-                        console.log( error )
-
+                        flashError( 'Failed to load data from server:' + textStatus )
                     },
                     "dataSrc": ''
-
                 },
 
                 "columns": [
@@ -135,20 +171,14 @@ append scripts
 
         })
 
-        function resetForm() {
-            $('form')[0].reset(); // reset form on modals
-            $('.form-group').removeClass('has-error'); // clear error class
-            $('.help-block').empty(); // clear error string
-
-        }
 
         function editItem(id) {
             save_method = 'POST';
-            item_url = '/resource/'+id
+            item_url = ResourceUrl + '/' + id
 
             resetForm()
 
-            //Ajax Load data from ajax
+            // Load item from server via ajax
             $.ajax({
                 url: item_url,
                 type: "GET",
@@ -156,14 +186,17 @@ append scripts
                 success: function (data) {
 
                     anObject = data
+
+                    // init modal fields:
                     $('#form-id').val(data._id);
                     $('#form-name').val(data.name);
+
                     $('#modal-form').modal('show'); // show bootstrap modal when complete loaded
-                    $('#modal-title').text('Edit Resource'); // Set title to Bootstrap modal title
+                    $('#modal-title').text( strEdit + ' ' + ResourceName); // Set title to Bootstrap modal title
 
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    alert('Error get data from server');
+                    flashError('Error get data from server');
                 }
             });
 
@@ -171,22 +204,22 @@ append scripts
 
         function addItem() {
             save_method = 'POST';
-            item_url = '/resource'
+            item_url = ResourceUrl
 
             resetForm()
             $('#modal-form').modal('show'); // show bootstrap modal
-            $('#modal-title').text('Add Resource'); // Set Title to Bootstrap modal title
+            $('#modal-title').text( strAdd + ' ' + ResourceName); // Set Title to Bootstrap modal title
         }
 
         function deleteItem(id) {
-            item_url = '/resource/'+id
+            item_url = ResourceUrl + '/' + id
 
             $('#confirm-delete').modal('show'); // show bootstrap modal
         }
 
         $('#confirm-delete-ok').click( function(){
             var btn = $('#confirm-delete-ok')
-            btn.text('...'); //change button text
+            btn.text( strDeleting ); //change button text
             btn.attr('disabled', true); //set button disable
 
             // ajax delete data on server
@@ -196,11 +229,11 @@ append scripts
                 dataType: "JSON",
                 complete: function (data) {
                     //if success reload ajax table
-                    btn.text('Ok')
-                    btn.attr('disabled', false); //set button disable
+                    btn.text( strOk )
+                    btn.attr('disabled', false) //set button disable
 
-                    $('#confirm-delete').modal('hide'); // show bootstrap modal
-                    reloadTable();
+                    $('#confirm-delete').modal('hide') // show bootstrap modal
+                    reloadTable()
                     flashSuccess('Item deleted')
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
@@ -210,42 +243,15 @@ append scripts
 
         })
 
-        var ndx = 0
-
-        function showalert(message, alerttype) {
-            ndx = ndx + 1
-            var alertNdx = 'alertdiv' + ndx.toString()
-
-            $('#alert-placeholder').append('<div id="'+alertNdx+'" class="alert ' + alerttype + '"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>')
-
-            setTimeout(function () { // this will automatically close the alert and remove this if the users doesnt close it in 5 secs
-                console.log( 'remove - ' + alertNdx)
-                $("#"+alertNdx).remove();
-            }, 3000);
-        }
-
-        function flashError( msg ) {
-            showalert(msg,'alert-error')
-        }
-
-        function flashSuccess(msg) {
-            showalert(msg,'alert-success')
-        }
 
         function reloadTable() {
             table.ajax.reload()
         }
 
-        function form_to_json(selector) {
-            var ary = $(selector).serializeArray();
-            var obj = {};
-            for (var a = 0; a < ary.length; a++) obj[ary[a].name] = ary[a].value;
-            return JSON.stringify(obj);
-        }
 
         function saveItem() {
             var btn = $('#form-save-btn')
-            btn.text('saving...'); //change button text
+            btn.text( strSaving ); //change button text
             btn.attr('disabled', true); //set button disable
 
             $.ajax({
@@ -260,18 +266,18 @@ append scripts
                 success: function (data, status) {
                     if (status) //if success close modal and reload ajax table
                     {
-                        $('#modal-form').modal('hide');
-                        reloadTable();
+                        $('#modal-form').modal('hide')
+                        reloadTable()
+                        flashSuccess( 'Item saved' )
                     }
-
-                    btn.text('save'); //change button text
-                    btn.attr('disabled', false); //set button enable
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    alert('Error saving data to server');
-                    btn.text('save'); //change button text
-                    btn.attr('disabled', false); //set button enable
+                    flashError('Error saving data to server')
 
+                },
+                complete: function() {
+                    btn.text( strSave )
+                    btn.attr('disabled', false)
                 }
             });
         }

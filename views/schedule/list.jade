@@ -1,18 +1,309 @@
 extends ../layout
 
+
 block content
+    - var ResourceName = 'Schedule'
+    - var ResourceUrl = '/schedule'
 
-    ul
-        each object in objects
-            li
-              div
-                  span schedule
-                  a(href='/schedule/' + object._id ) ==>
-                  span  ( #{object.startDate.toLocaleDateString()} -  #{object.endDate.toLocaleDateString()} )
+    // Modal dialog box for editing/adding resource's item:
+    .modal.fade(id="modal-form", tabindex="-1", role="dialog")
+        .modal-dialog.modal-md
+            .modal-content.col-xs-12
+                .modal-header
+                    button(type="button", class="close", data-dismiss="modal") &times;
+                    h3(id="modal-title") #{ResourceName}
+                .modal-body.row
+                    form(id="form-item").form-horizontal
+                        .form-group.col-xs-12
+                            .col-xs-1
+                                label(for="form-id") Id:
+                            .col-xs-9
+                                input.form-control(id="form-id", name="_id", disabled, type="text", placeholder="Id")
+                        .form-group.col-xs-12
+                            .col-xs-5
+                                label(for="form-start-date") Start date:
+                                input.form-control(id="form-start-date", name="startDate", type="date")
+                            .col-xs-5
+                                label(for="form-end-date") End date:
+                                input.form-control(id="form-end-date", name="endDate", type="date")
+                        .form-group.col-xs-12
+                            .col-xs-5
+                                label(for="form-start-time") Start time:
+                            .col-xs-5
+                                label(for="form-end-hour") End time:
+                        .form-group.col-xs-12
+                            .col-xs-4
+                                input.form-control(id="form-start-time", name="startHour", type="time")
+                            .col-xs-2.col-xs-offset-1
+                                input.form-control.col-xs-2(id="form-end-hour", name="endHour", type="number")
+                            .col-xs-2
+                                input.form-control.col-xs-2(id="form-end-min", name="endMin", type="number")
+                .modal-footer
+                    button.btn.btn-primary(id="form-save-btn",type="Button",onclick="saveItem()") Save
 
 
-    if user
-        p User #{user.profile.name} logged in
-    else
-        p User not logged in
+    include /partials/confirm-delete-modal
 
+    div(id="alert-placeholder")
+
+    h3 #{ResourceName}
+    br
+    button.btn.btn-success(onclick="addItem()")
+        i.glyphicon.glyphicon-plus  Add
+    button.btn.btn-default(onclick="reloadTable()")
+        i.glyphicon.glyphicon-refresh  Reload
+    br
+
+    //- List template
+    table(id="table").table.table-bordered.table-striped
+
+        thead
+            tr
+                th Start Date
+                th End Date
+                th Start Time
+                th End Time
+
+
+
+append headCss
+    include /partials/datatables.css.jade
+    include /partials/bootstrap-datepicker.css.jade
+
+append scripts
+    include /partials/datatables.js.jade
+    include /partials/bootstrap-datepicker.js.jade
+
+
+    script.
+        "use strict;"
+
+        var ResourceName = "!{ResourceName}"
+        var ResourceUrl = "!{ResourceUrl}"
+
+        var save_method
+        var table
+        var item_url
+
+        var anObject = {}
+
+        var strSave = 'Save',
+                strOk = 'Ok',
+                strEdit = 'Edit',
+                strDeleting = 'Deleting ...',
+                strAdd = 'Add',
+                strSaving = 'Saving ...'
+
+        // Focus first field in edit modal:
+        $('#modal-form').on('shown.bs.modal', function () {
+            $('#form-name').focus();
+        })
+
+        var ndx = 0
+
+        function showalert(message, alerttype) {
+            ndx = ndx + 1
+            var alertNdx = 'alertdiv' + ndx.toString()
+
+            $('#alert-placeholder').append('<div id="' + alertNdx + '" class="alert ' + alerttype + '"><a class="close" data-dismiss="alert">&times;</a><span>' + message + '</span></div>')
+
+            setTimeout(function () { // this will automatically close the alert and remove this if the users doesnt close it in 5 secs
+                $("#" + alertNdx).remove();
+            }, 4500);
+        }
+
+        function flashError(msg) {
+            showalert(msg, 'alert-danger')
+        }
+
+        function flashSuccess(msg) {
+            showalert(msg, 'alert-success')
+        }
+
+        function resetForm() {
+            $('form')[0].reset(); // reset form on modals
+            $('.form-group').removeClass('has-error'); // clear error class
+            $('.help-block').empty(); // clear error string
+
+        }
+
+        function form_to_json(selector) {
+            var ary = $(selector).serializeArray();
+            var obj = {};
+            for (var a = 0; a < ary.length; a++) obj[ary[a].name] = ary[a].value;
+            return JSON.stringify(obj);
+        }
+
+
+        $(document).ready( function() {
+            table = $('#table').DataTable({
+                "processing": false,
+                "searching": false,
+                "lengthChange": false,
+                "pageLength": 50,
+                "info": false,
+                "select": false,
+                "ajax": {
+                    "url": ResourceUrl,
+                    "method": "GET",
+                    "error": function( xhr, textStatus, error) {
+                        flashError( 'Failed to load data from server:' + textStatus )
+                    },
+                    "dataSrc": ''
+                },
+
+                "columns": [
+                    {   data: "startDate" },
+                    {   data: "endDate" },
+                    {   data: "startHour" },
+                    {   data: "endHour" },
+                    {
+                        width: "20%",
+                        render: function(data,type,row,meta) {
+                            return "<a class='btn btn-sm btn-primary' onclick='editItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-pencil'></i> Edit</a>" +
+                                    "<a class='btn btn-sm btn-danger' onclick='deleteItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-trash'></i> Delete</a>";
+                        }
+                    }
+                ] /* ,
+                 dom: 'Bfrtip',
+                 buttons: [
+                 {
+                 text: 'New Resource',
+                 action: function (ev, dt, node, config) {
+                 $('#modal-form').modal('show')
+                 }
+                 },
+                 {
+                 text: 'Reload',
+                 action: function (ev, dt, node, config) {
+                 dt.ajax.reload();
+                 }
+                 }
+                 ] */
+
+            });
+
+            /*
+             $('#table tbody').on('click', 'tr', function () {
+
+             anObject = table.row(this).data()
+
+             $("#form-name").val( anObject.name )
+             $('#modal-form').modal('show')
+             $("#form-name").focus()
+
+             console.log( anObject);
+             }); */
+
+        })
+
+
+        function editItem(id) {
+            save_method = 'POST';
+            item_url = ResourceUrl + '/' + id
+
+            resetForm()
+
+            // Load item from server via ajax
+            $.ajax({
+                url: item_url,
+                type: "GET",
+                dataType: "JSON",
+                success: function (data) {
+
+                    anObject = data
+
+                    // init modal fields:
+                    $('#form-id').val(data._id);
+                    $('#form-name').val(data.name);
+
+                    $('#modal-form').modal('show'); // show bootstrap modal when complete loaded
+                    $('#modal-title').text( strEdit + ' ' + ResourceName); // Set title to Bootstrap modal title
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    flashError('Error get data from server');
+                }
+            });
+
+        }
+
+        function addItem() {
+            save_method = 'POST';
+            item_url = ResourceUrl
+
+            resetForm()
+            $('#modal-form').modal('show'); // show bootstrap modal
+            $('#modal-title').text( strAdd + ' ' + ResourceName); // Set Title to Bootstrap modal title
+        }
+
+        function deleteItem(id) {
+            item_url = ResourceUrl + '/' + id
+
+            $('#confirm-delete').modal('show'); // show bootstrap modal
+        }
+
+        $('#confirm-delete-ok').click( function(){
+            var btn = $('#confirm-delete-ok')
+            btn.text( strDeleting ); //change button text
+            btn.attr('disabled', true); //set button disable
+
+            // ajax delete data on server
+            $.ajax({
+                url: item_url,
+                type: "DELETE",
+                dataType: "JSON",
+                complete: function (data) {
+                    //if success reload ajax table
+                    btn.text( strOk )
+                    btn.attr('disabled', false) //set button disable
+
+                    $('#confirm-delete').modal('hide') // show bootstrap modal
+                    reloadTable()
+                    flashSuccess('Item deleted')
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    flashError('Error deleting data');
+                }
+            });
+
+        })
+
+
+        function reloadTable() {
+            table.ajax.reload()
+        }
+
+
+        function saveItem() {
+            var btn = $('#form-save-btn')
+            btn.text( strSaving ); //change button text
+            btn.attr('disabled', true); //set button disable
+
+            $.ajax({
+                url: item_url,
+                type: save_method,
+                headers: {
+                    Accept: "application/json; charset=utf-8",
+                    "Content-Type": "application/json; charset=utf-8"
+                },
+                data: form_to_json('form'),
+                dataType: "JSON",
+                success: function (data, status) {
+                    if (status) //if success close modal and reload ajax table
+                    {
+                        $('#modal-form').modal('hide')
+                        reloadTable()
+                        flashSuccess( 'Item saved' )
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    flashError('Error saving data to server')
+
+                },
+                complete: function() {
+                    btn.text( strSave )
+                    btn.attr('disabled', false)
+                }
+            });
+        }

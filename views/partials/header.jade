@@ -7,20 +7,16 @@
         span.icon-bar
         span.icon-bar
       a.navbar-brand(href='/')
-        i.fa.fa-cube
-        | Project name
+        i.fa.fa-thumbs-o-up(aria-hidden="true")
+        | Tennis Arena
     .collapse.navbar-collapse
       ul.nav.navbar-nav
-        li(class=(title == 'Home') ? 'active' : undefined)
-          a(href='/') Home
         li(class=(title == 'Расписание') ? 'active' : undefined)
           a(href='/reservation') Расписание
         li(class=(title == 'График работы') ? 'active' : undefined)
           a(href='/schedule') График работы
         li(class=(title == 'Resources') ? 'active' : undefined)
           a(href='/resource') Ресурсы (корты)
-        li(class=(title == 'Contact') ? 'active' : undefined)
-          a(href='/contact') Contact
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title == 'Login') ? 'active' : undefined)

@@ -15,29 +15,46 @@ block content
                 .modal-body.row
                     form(id="form-item").form-horizontal
                         .form-group.col-xs-12
-                            .col-xs-1
+                            .col-xs-2
                                 label(for="form-id") Id:
-                            .col-xs-9
-                                input.form-control(id="form-id", name="_id", disabled, type="text", placeholder="Id")
+                            .col-xs-10
+                                input.form-control(id="form-id", name="_id", disabled, type="text", placeholder="(new)")
                         .form-group.col-xs-12
-                            .col-xs-5
+                            hr
+                            .col-xs-6
                                 label(for="form-start-date") Start date:
                                 input.form-control(id="form-start-date", name="startDate", type="date")
-                            .col-xs-5
+                            .col-xs-6
                                 label(for="form-end-date") End date:
                                 input.form-control(id="form-end-date", name="endDate", type="date")
                         .form-group.col-xs-12
-                            .col-xs-5
-                                label(for="form-start-time") Start time:
-                            .col-xs-5
+                            .col-xs-6
+                                label(for="form-start-hour") Start time:
+                            .col-xs-6
                                 label(for="form-end-hour") End time:
                         .form-group.col-xs-12
-                            .col-xs-4
-                                input.form-control(id="form-start-time", name="startHour", type="time")
-                            .col-xs-2.col-xs-offset-1
-                                input.form-control.col-xs-2(id="form-end-hour", name="endHour", type="number")
                             .col-xs-2
-                                input.form-control.col-xs-2(id="form-end-min", name="endMin", type="number")
+                                input.form-control(id="form-start-hour", name="startHour", type="number", min=0, max=23)
+                            .col-xs-2
+                                input.form-control(id="form-start-min", name="startMin", type="number", min=0, max=59)
+
+                            .col-xs-2.col-xs-offset-2
+                                input.form-control.col-xs-2(id="form-end-hour", name="endHour", type="number", min=0, max=23)
+                            .col-xs-2
+                                input.form-control.col-xs-2(id="form-end-min", name="endMin", type="number", min=0, max=59)
+                        .form-group.col-xs-12
+                            hr
+                            .col-xs-6
+                                label(for="form-slot-size") Slot (m, step by 15):
+                            .col-xs-6
+                                label(for="form-price") Price:
+                        .form-group.col-xs-12
+                            .col-xs-3
+                                input.form-control(id="form-slot-size", name="slotSize", type="number", min=0, max=60, step=15)
+                            .col-xs-3.col-xs-offset-3
+                                input.form-control(id="form-price", name="price", type="number", min=0)
+
+
                 .modal-footer
                     button.btn.btn-primary(id="form-save-btn",type="Button",onclick="saveItem()") Save
 
@@ -48,10 +65,11 @@ block content
 
     h3 #{ResourceName}
     br
-    button.btn.btn-success(onclick="addItem()")
-        i.glyphicon.glyphicon-plus  Add
-    button.btn.btn-default(onclick="reloadTable()")
-        i.glyphicon.glyphicon-refresh  Reload
+    .btn-group.btn-group-sm
+        button.btn.btn-success(onclick="addItem()")
+            i.glyphicon.glyphicon-plus  Add
+        button.btn.btn-default(onclick="reloadTable()")
+            i.glyphicon.glyphicon-refresh  Reload
     br
 
     //- List template
@@ -64,6 +82,7 @@ block content
                 th Start Time
                 th End Time
                 th Slot Size
+                th Price
                 th Actions
 
 
@@ -173,45 +192,20 @@ append scripts
                     {   render: function(data,type,row,meta) { return formatDateFromString(row.endDate) } },
                     {   render: function(data,type,row,meta) { return formatTime(row.startHour, row.startMin) } },
                     {   render: function(data,type,row,meta) { return formatTime(row.endHour, row.endMin) } },
-                    {   data: "slotSize", className:"text-right" },
+                    {   className: "text-right", render: function(data,type,row,meta) { return row.slotSize.toString() + "min" } },
+                    {   className: "text-right", render: function(data,type,row,meta) { return row.price.toString() + "р." } },
                     {
                         width: "20%",
+                        className: "text-center",
                         render: function(data,type,row,meta) {
-                            return "<a class='btn btn-sm btn-primary' onclick='editItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-pencil'></i> Edit</a>" +
-                                    "<a class='btn btn-sm btn-danger' onclick='deleteItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-trash'></i> Delete</a>";
+                            return "<div class='btn-group btn-group-sm'>" +
+                                "<a class='btn btn-sm btn-primary' onclick='editItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-pencil'></i> Edit</a>" +
+                                    "<a class='btn btn-sm btn-danger' onclick='deleteItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-trash'></i> Delete</a>" +
+                                    "</div>";
                         }
                     }
-                ] /* ,
-                 dom: 'Bfrtip',
-                 buttons: [
-                 {
-                 text: 'New Resource',
-                 action: function (ev, dt, node, config) {
-                 $('#modal-form').modal('show')
-                 }
-                 },
-                 {
-                 text: 'Reload',
-                 action: function (ev, dt, node, config) {
-                 dt.ajax.reload();
-                 }
-                 }
-                 ] */
-
+                ]
             });
-
-            /*
-             $('#table tbody').on('click', 'tr', function () {
-
-             anObject = table.row(this).data()
-
-             $("#form-name").val( anObject.name )
-             $('#modal-form').modal('show')
-             $("#form-name").focus()
-
-             console.log( anObject);
-             }); */
-
         })
 
 
@@ -234,10 +228,12 @@ append scripts
                     $('#form-id').val(data._id);
                     $('#form-start-date').val( formatDateFromString(data.startDate));
                     $('#form-end-date').val(formatDateFromString(data.endDate));
-                    //$('#form-start-time').val(data.name);
+                    $('#form-start-hour').val(data.startHour);
+                    $('#form-start-min').val(data.startMin);
                     $('#form-end-hour').val(data.endHour);
                     $('#form-end-min').val(data.endMin);
-
+                    $('#form-slot-size').val(data.slotSize);
+                    $('#form-price').val(data.price);
 
                     $('#modal-form').modal('show'); // show bootstrap modal when complete loaded
                     $('#modal-title').text( strEdit + ' ' + ResourceName); // Set title to Bootstrap modal title

@@ -7,7 +7,6 @@ const express = require('express')
  */
 const homeController = require('../controllers/home')
 const userController = require('../controllers/user')
-const contactController = require('../controllers/contact')
 
 const ReservationRouter = require('./routes/reservation.router.js')
 const ScheduleRouter = require('./routes/schedule.router.js')
@@ -32,10 +31,6 @@ exports = module.exports = class {
     app.post('/reset/:token', userController.postReset)
     app.get('/signup', userController.getSignup)
     app.post('/signup', userController.postSignup)
-
-    // contact controller's routes:
-    app.get('/contact', isAuthenticated, contactController.getContact)
-    app.post('/contact', contactController.postContact)
 
     app.get('/account', isAuthenticated, userController.getAccount)
     app.post('/account/profile', isAuthenticated, userController.postUpdateProfile)

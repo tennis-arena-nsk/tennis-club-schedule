@@ -16,7 +16,7 @@ block content
                     form(id="form-item").form-horizontal
                         .form-group
                             label(for="form-id") Id:
-                            input.form-control(id="form-id", name="_id", disabled, type="text", placeholder="Id")
+                            input.form-control(id="form-id", name="_id", disabled, type="text", placeholder="(new)")
 
                             label(for="form-name") name:
                             input.form-control(id="form-name", name="name", type="text", placeholder="Resource name")
@@ -30,23 +30,38 @@ block content
 
     h3 #{ResourceName}
     br
-    button.btn.btn-success(onclick="addItem()")
-        i.glyphicon.glyphicon-plus  Add
-    button.btn.btn-default(onclick="reloadTable()")
-        i.glyphicon.glyphicon-refresh  Reload
-    br
 
     //- List template
-    table(id="table").table.table-bordered.table-striped
+    .container
+        .row.col-xs-8
+            .btn-group.btn-group-sm
+                button.btn.btn-success(onclick="addItem()")
+                    i.glyphicon.glyphicon-plus  Add
+                button.btn.btn-default(onclick="reloadTable()")
+                    i.glyphicon.glyphicon-refresh  Reload
+            br
 
-        thead
-            tr
-                th Name
-                th Actions
+            table(id="table").table.table-bordered.table-striped
+
+                thead
+                    tr
+                        th Name
+                        th Actions
 
 
 append headCss
     include /partials/datatables.css.jade
+    style.
+
+        .btn-group {
+            white-space: nowrap;
+
+            .btn {
+                float: none;
+                display: inline-block;
+            }
+        }
+
 
 append scripts
     include /partials/datatables.js.jade
@@ -132,10 +147,12 @@ append scripts
                 "columns": [
                     {   data: "name" },
                     {
-                        width: "20%",
+                        width: "30%",
+                        className: "text-center",
                         render: function(data,type,row,meta) {
-                            return "<a class='btn btn-sm btn-primary' onclick='editItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-pencil'></i> Edit</a>" +
-                                "<a class='btn btn-sm btn-danger' onclick='deleteItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-trash'></i> Delete</a>";
+                            return '<div class="btn-group btn-group-sm" role="group">' + "<button class='btn btn-primary' onclick='editItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-pencil'></i> Edit</button>" +
+                                    "<button class='btn btn-danger' onclick='deleteItem(" + '"' + row["_id"] +'"' + ")'><i class='glyphicon glyphicon-trash'></i> Delete</button>"+
+                                    "</div>";
                         }
                     }
                 ] /* ,

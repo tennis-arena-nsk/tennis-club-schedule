@@ -63,6 +63,8 @@ block content
                 th End Date
                 th Start Time
                 th End Time
+                th Slot Size
+                th Actions
 
 
 
@@ -134,6 +136,20 @@ append scripts
             return JSON.stringify(obj);
         }
 
+        function formatDate(d) {
+            return d.getFullYear().toString() + '-' +
+                    ("0" + (d.getMonth() + 1)).slice(-2) + '-' +
+                    ("0" + d.getDate()).slice(-2)
+        }
+
+        function formatDateFromString(dateAsString) {
+            return formatDate(new Date(Date.parse(dateAsString)))
+        }
+
+        function formatTime( hours, mins ) {
+            return ("0" + (hours + 0)).slice(-2) + ':' + ("0" + (mins + 0)).slice(-2)
+        }
+
 
         $(document).ready( function() {
             table = $('#table').DataTable({
@@ -153,10 +169,11 @@ append scripts
                 },
 
                 "columns": [
-                    {   data: "startDate" },
-                    {   data: "endDate" },
-                    {   data: "startHour" },
-                    {   data: "endHour" },
+                    {   render: function(data,type,row,meta) { return formatDateFromString(row.startDate) } },
+                    {   render: function(data,type,row,meta) { return formatDateFromString(row.endDate) } },
+                    {   render: function(data,type,row,meta) { return formatTime(row.startHour, row.startMin) } },
+                    {   render: function(data,type,row,meta) { return formatTime(row.endHour, row.endMin) } },
+                    {   data: "slotSize", className:"text-right" },
                     {
                         width: "20%",
                         render: function(data,type,row,meta) {
@@ -215,7 +232,12 @@ append scripts
 
                     // init modal fields:
                     $('#form-id').val(data._id);
-                    $('#form-name').val(data.name);
+                    $('#form-start-date').val( formatDateFromString(data.startDate));
+                    $('#form-end-date').val(formatDateFromString(data.endDate));
+                    //$('#form-start-time').val(data.name);
+                    $('#form-end-hour').val(data.endHour);
+                    $('#form-end-min').val(data.endMin);
+
 
                     $('#modal-form').modal('show'); // show bootstrap modal when complete loaded
                     $('#modal-title').text( strEdit + ' ' + ResourceName); // Set title to Bootstrap modal title

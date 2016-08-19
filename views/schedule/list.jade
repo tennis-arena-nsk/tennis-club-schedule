@@ -23,10 +23,10 @@ block content
                             hr
                             .col-xs-6
                                 label(for="form-start-date") Start date:
-                                input.form-control(id="form-start-date", name="startDate", type="date")
+                                input.form-control.datepicker(id="form-start-date", name="startDate", type="text")
                             .col-xs-6
                                 label(for="form-end-date") End date:
-                                input.form-control(id="form-end-date", name="endDate", type="date")
+                                input.form-control.datepicker(id="form-end-date", name="endDate", type="text")
                         .form-group.col-xs-12
                             .col-xs-6
                                 label(for="form-start-hour") Start time:
@@ -68,7 +68,7 @@ block content
     .btn-group.btn-group-sm
         button.btn.btn-success(onclick="addItem()")
             i.glyphicon.glyphicon-plus  Add
-        button.btn.btn-default(onclick="reloadTable()")
+        button.btn.btn-default(id = "btn-reload" onclick="reloadTable()")
             i.glyphicon.glyphicon-refresh  Reload
     br
 
@@ -113,7 +113,9 @@ append scripts
                 strEdit = 'Edit',
                 strDeleting = 'Deleting ...',
                 strAdd = 'Add',
-                strSaving = 'Saving ...'
+                strSaving = 'Saving ...',
+                strReloading = 'Reloading ...',
+                strReload = 'Reload'
 
         // Focus first field in edit modal:
         $('#modal-form').on('shown.bs.modal', function () {
@@ -171,6 +173,7 @@ append scripts
 
 
         $(document).ready( function() {
+            // datatable init
             table = $('#table').DataTable({
                 "processing": false,
                 "searching": false,
@@ -179,12 +182,15 @@ append scripts
                 "info": false,
                 "select": false,
                 "ajax": {
-                    "url": ResourceUrl,
-                    "method": "GET",
-                    "error": function( xhr, textStatus, error) {
+                    url: ResourceUrl,
+                    method: "GET",
+                    error: function( xhr, textStatus, error) {
                         flashError( 'Failed to load data from server:' + textStatus )
                     },
-                    "dataSrc": ''
+                    dataSrc: '',
+                    beforeSend: function (xhr, settings) { $("#btn-reload").text(strReloading) },
+                    complete:  function (xhr, settings) { $("#btn-reload").text(strReload) }
+
                 },
 
                 "columns": [
@@ -205,6 +211,17 @@ append scripts
                         }
                     }
                 ]
+            })
+
+            // datepicker init
+            $('.datepicker').datepicker({
+                format: "yyyy-mm-dd",
+                weekStart: 1,
+                todayBtn: "linked",
+                language: "ru",
+                orientation: "bottom auto",
+                autoclose: true,
+                todayHighlight: true
             });
         })
 
@@ -226,21 +243,21 @@ append scripts
 
                     // init modal fields:
                     $('#form-id').val(data._id);
-                    $('#form-start-date').val( formatDateFromString(data.startDate));
-                    $('#form-end-date').val(formatDateFromString(data.endDate));
-                    $('#form-start-hour').val(data.startHour);
-                    $('#form-start-min').val(data.startMin);
-                    $('#form-end-hour').val(data.endHour);
-                    $('#form-end-min').val(data.endMin);
-                    $('#form-slot-size').val(data.slotSize);
-                    $('#form-price').val(data.price);
+                    $('#form-start-date').datepicker('update', formatDateFromString(data.startDate) )
+                    $('#form-end-date').datepicker('update', formatDateFromString(data.endDate) )
+                    $('#form-start-hour').val(data.startHour)
+                    $('#form-start-min').val(data.startMin)
+                    $('#form-end-hour').val(data.endHour)
+                    $('#form-end-min').val(data.endMin)
+                    $('#form-slot-size').val(data.slotSize)
+                    $('#form-price').val(data.price)
 
-                    $('#modal-form').modal('show'); // show bootstrap modal when complete loaded
-                    $('#modal-title').text( strEdit + ' ' + ResourceName); // Set title to Bootstrap modal title
+                    $('#modal-form').modal('show') // show bootstrap modal when complete loaded
+                    $('#modal-title').text( strEdit + ' ' + ResourceName) // Set title to Bootstrap modal title
 
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    flashError('Error get data from server');
+                    flashError('Error get data from server')
                 }
             });
 
